@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>作品集 - 自动测试</title>
+    <style>
+        /* 测试结果页面样式 */
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            padding: 24px;
+            background: #f0f2f5;
+            margin: 0;
+        }
+
+        h1 { color: #333; margin-bottom: 4px; }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        /* 汇总条 */
+        .summary {
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 14px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .summary.all-pass { background: #c8e6c9; color: #1b5e20; }
+        .summary.has-fail { background: #ffcdd2; color: #b71c1c; }
+
+        /* 每组测试套件 */
+        .suite {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .suite h3 {
+            margin: 0 0 12px 0;
+            font-size: 1em;
+            color: #555;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        /* 单条测试结果 */
+        .test-case {
+            padding: 7px 10px;
+            margin: 4px 0;
+            border-radius: 4px;
+            font-size: 0.95em;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .test-case.pass { background: #f1f8f1; color: #2e7d32; }
+        .test-case.fail { background: #fff3f3; color: #c62828; }
+
+        .test-case .error-msg {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-left: 20px;
+        }
+
+        /* 脚本加载失败时的错误提示 */
+        .load-error {
+            background: #ffcdd2;
+            color: #b71c1c;
+            padding: 14px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* 隐藏的 app DOM（app.js 需要这些元素才能运行） */
+        #app-container { display: none; }
+    </style>
+</head>
+<body>
+    <h1>作品集 - 自动测试</h1>
+    <p class="subtitle">在浏览器中直接打开此文件即可运行全部测试</p>
+
+    <!-- 隐藏的 DOM 结构，app.js 启动时会通过 getElementById 找到这个按钮 -->
+    <div id="app-container">
+        <button id="themeToggleBtn">&#127769;</button>
+    </div>
+
+    <!-- 加载 app.js，它会立即执行并把事件绑到上面的按钮上 -->
+    <script src="../src/app.js"></script>
+
+    <script>
+        // ==========================================
+        // 捕获未处理的脚本错误，显示在页面上
+        // ==========================================
+        window.onerror = function (msg, src, line) {
+            var errDiv = document.createElement("div");
+            errDiv.className = "load-error";
+            errDiv.textContent = "脚本错误（行 " + line + "）：" + msg;
+            document.body.appendChild(errDiv);
+        };
+
+        // ==========================================
+        // 检查 app.js 是否加载成功
+        // ==========================================
+        if (typeof applyTheme === "undefined" || typeof themeToggleBtn === "undefined") {
+            var errDiv = document.createElement("div");
+            errDiv.className = "load-error";
+            errDiv.textContent = "加载失败：app.js 未能正确加载，请确认文件路径 ../src/app.js 正确";
+            document.body.appendChild(errDiv);
+        }
+
+        // ==========================================
+        // 测试框架
+        // ==========================================
+
+        var allSuites = [];
+
+        // 断言：条件为 false 时抛出错误
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || "断言失败");
+            }
+        }
+
+        // 断言相等：actual !== expected 时抛出错误
+        function assertEqual(actual, expected, label) {
+            if (actual !== expected) {
+                var prefix = label ? label + "：" : "";
+                throw new Error(prefix + "期望 [" + expected + "]，实际得到 [" + actual + "]");
+            }
+        }
+
+        // 注册一个测试套件并立即执行其中所有用例
+        function describe(suiteName, cases) {
+            var results = [];
+            for (var i = 0; i < cases.length; i++) {
+                var name = cases[i][0];
+                var fn = cases[i][1];
+                try {
+                    fn();
+                    results.push({ name: name, pass: true });
+                } catch (e) {
+                    results.push({ name: name, pass: false, error: e.message });
+                }
+            }
+            allSuites.push({ suiteName: suiteName, results: results });
+        }
+
+        // ==========================================
+        // 辅助函数
+        // ==========================================
+
+        // 取按钮元素（直接从 DOM 获取，不依赖 app.js 的全局变量）
+        var btn = document.getElementById("themeToggleBtn");
+
+        // 重置主题状态：移除 dark class，清除 localStorage，还原按钮图标
+        function resetTheme() {
+            document.body.classList.remove("dark");
+            localStorage.removeItem("theme");
+            btn.textContent = "\u{1F319}"; // 🌙
+        }
+
+        // ==========================================
+        // 测试套件 1：applyTheme 函数
+        // ==========================================
+        describe("1. applyTheme 函数", [
+            ["传入 'dark'，body 添加 dark class", function () {
+                resetTheme();
+                applyTheme("dark");
+                assert(document.body.classList.contains("dark"), "body 应含 dark class");
+            }],
+
+            ["传入 'dark'，按钮图标变为 sun", function () {
+                resetTheme();
+                applyTheme("dark");
+                assert(btn.textContent !== "\u{1F319}", "暗黑模式下按钮图标应改变");
+            }],
+
+            ["传入 'light'，body 移除 dark class", function () {
+                applyTheme("dark");
+                applyTheme("light");
+                assert(!document.body.classList.contains("dark"), "body 不应含 dark class");
+            }],
+
+            ["传入 'light'，按钮图标恢复为 moon", function () {
+                applyTheme("dark");
+                applyTheme("light");
+                assertEqual(btn.textContent.trim(), "\u{1F319}", "亮色模式按钮图标应为月亮");
+            }],
+
+            ["连续调用 applyTheme，最终状态与最后一次调用一致", function () {
+                resetTheme();
+                applyTheme("dark");
+                applyTheme("light");
+                applyTheme("dark");
+                assert(document.body.classList.contains("dark"), "最终应为暗黑模式");
+            }],
+        ]);
+
+        // ==========================================
+        // 测试套件 2：按钮点击切换行为
+        // ==========================================
+        describe("2. 按钮点击切换行为", [
+            ["初始为亮色模式，点击按钮后切换为暗黑模式", function () {
+                resetTheme();
+                btn.click();
+                assert(document.body.classList.contains("dark"), "点击后应进入暗黑模式");
+            }],
+
+            ["暗黑模式下点击按钮，切换回亮色模式", function () {
+                resetTheme();
+                applyTheme("dark");
+                btn.click();
+                assert(!document.body.classList.contains("dark"), "点击后应退出暗黑模式");
+            }],
+
+            ["点击后暗黑模式，再点击后退出暗黑模式，图标恢复为月亮", function () {
+                resetTheme();
+                btn.click(); // 亮→暗
+                btn.click(); // 暗→亮
+                assertEqual(btn.textContent.trim(), "\u{1F319}", "图标应恢复为月亮");
+            }],
+
+            ["暗黑模式下点击后，body 不含 dark class", function () {
+                resetTheme();
+                btn.click(); // 亮→暗
+                btn.click(); // 暗→亮
+                assert(!document.body.classList.contains("dark"), "两次点击后应回到亮色模式");
+            }],
+
+            ["连续奇数次点击后处于暗黑模式", function () {
+                resetTheme();
+                btn.click(); // 亮→暗
+                btn.click(); // 暗→亮
+                btn.click(); // 亮→暗
+                assert(document.body.classList.contains("dark"), "三次点击后应为暗黑模式");
+            }],
+        ]);
+
+        // ==========================================
+        // 测试套件 3：localStorage 主题持久化
+        // ==========================================
+        describe("3. localStorage 主题持久化", [
+            ["点击切换到暗黑模式后，localStorage 保存 'dark'", function () {
+                resetTheme();
+                btn.click();
+                assertEqual(localStorage.getItem("theme"), "dark", "localStorage 应保存 dark");
+            }],
+
+            ["从暗黑模式切换回亮色后，localStorage 保存 'light'", function () {
+                resetTheme();
+                applyTheme("dark");
+                btn.click();
+                assertEqual(localStorage.getItem("theme"), "light", "localStorage 应保存 light");
+            }],
+
+            ["localStorage 有 'dark' 时调用 applyTheme，body 含 dark class", function () {
+                resetTheme();
+                localStorage.setItem("theme", "dark");
+                applyTheme(localStorage.getItem("theme"));
+                assert(document.body.classList.contains("dark"), "读取 dark 后应进入暗黑模式");
+            }],
+
+            ["localStorage 有 'light' 时调用 applyTheme，body 不含 dark class", function () {
+                resetTheme();
+                localStorage.setItem("theme", "light");
+                applyTheme(localStorage.getItem("theme"));
+                assert(!document.body.classList.contains("dark"), "读取 light 后应保持亮色模式");
+            }],
+
+            ["连续切换后，localStorage 始终与当前模式同步", function () {
+                resetTheme();
+                btn.click();
+                assertEqual(localStorage.getItem("theme"), "dark", "第一次切换后应为 dark");
+                btn.click();
+                assertEqual(localStorage.getItem("theme"), "light", "第二次切换后应为 light");
+                btn.click();
+                assertEqual(localStorage.getItem("theme"), "dark", "第三次切换后应为 dark");
+            }],
+        ]);
+
+        // ==========================================
+        // 把测试结果渲染到页面
+        // ==========================================
+
+        var totalPass = 0;
+        var totalFail = 0;
+        for (var si = 0; si < allSuites.length; si++) {
+            for (var ri = 0; ri < allSuites[si].results.length; ri++) {
+                if (allSuites[si].results[ri].pass) {
+                    totalPass++;
+                } else {
+                    totalFail++;
+                }
+            }
+        }
+
+        var total = totalPass + totalFail;
+
+        // 汇总条
+        var summaryEl = document.createElement("div");
+        summaryEl.className = "summary " + (totalFail === 0 ? "all-pass" : "has-fail");
+        summaryEl.textContent = "测试完成：" + totalPass + " 通过 / " + totalFail + " 失败 / 共 " + total + " 项";
+        document.body.appendChild(summaryEl);
+
+        // 各套件结果
+        for (var si2 = 0; si2 < allSuites.length; si2++) {
+            var suite = allSuites[si2];
+            var suiteEl = document.createElement("div");
+            suiteEl.className = "suite";
+
+            var h3 = document.createElement("h3");
+            var suitePass = 0;
+            for (var ri2 = 0; ri2 < suite.results.length; ri2++) {
+                if (suite.results[ri2].pass) { suitePass++; }
+            }
+            h3.textContent = suite.suiteName + "（" + suitePass + "/" + suite.results.length + "）";
+            suiteEl.appendChild(h3);
+
+            for (var ri3 = 0; ri3 < suite.results.length; ri3++) {
+                var result = suite.results[ri3];
+                var caseEl = document.createElement("div");
+                caseEl.className = "test-case " + (result.pass ? "pass" : "fail");
+
+                var icon = result.pass ? "\u2713" : "\u2717";
+                var nameEl = document.createElement("span");
+                nameEl.textContent = icon + "  " + result.name;
+                caseEl.appendChild(nameEl);
+
+                if (!result.pass) {
+                    var errEl = document.createElement("span");
+                    errEl.className = "error-msg";
+                    errEl.textContent = "错误：" + result.error;
+                    caseEl.appendChild(errEl);
+                }
+
+                suiteEl.appendChild(caseEl);
+            }
+
+            document.body.appendChild(suiteEl);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+/* ===== 全局基础样式 ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  background-color: #f4f6fb;
+  color: #333;
+  line-height: 1.8;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* ===== 暗黑模式切换按钮 ===== */
+.theme-toggle-btn {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 999;
+  transition: background-color 0.3s, border-color 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.theme-toggle-btn:hover {
+  background-color: #f0f0f0;
+}
+
+/* ===== 内容居中容器 ===== */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ===== 个人介绍区域（Hero） ===== */
+.hero {
+  background: linear-gradient(135deg, #1a73e8 0%, #6c3fe8 100%);
+  color: #fff;
+  text-align: center;
+  padding: 100px 20px 80px;
+}
+
+/* 头像圆圈 */
+.avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background-color: rgba(255,255,255,0.25);
+  font-size: 40px;
+  font-weight: bold;
+  line-height: 90px;
+  margin: 0 auto 20px;
+  animation: fadeDown 0.8s ease;
+}
+
+.hero-name {
+  font-size: 36px;
+  font-weight: bold;
+  animation: fadeDown 0.9s ease;
+}
+
+.hero-profession {
+  font-size: 18px;
+  margin-top: 8px;
+  opacity: 0.85;
+  animation: fadeDown 1s ease;
+}
+
+.hero-bio {
+  font-size: 15px;
+  margin-top: 16px;
+  opacity: 0.75;
+  animation: fadeDown 1.1s ease;
+}
+
+/* ===== 区块通用样式 ===== */
+.section {
+  padding: 70px 0;
+}
+
+/* 交替背景色区块 */
+.section-alt {
+  background-color: #eef2ff;
+}
+
+.section-title {
+  font-size: 26px;
+  color: #1a73e8;
+  text-align: center;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+/* 标题下方装饰线 */
+.section-title::after {
+  content: "";
+  display: block;
+  width: 50px;
+  height: 3px;
+  background-color: #1a73e8;
+  margin: 10px auto 0;
+  border-radius: 2px;
+}
+
+/* ===== 技能卡片网格 ===== */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 20px;
+}
+
+.skill-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 24px 16px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  transition: transform 0.25s, box-shadow 0.25s;
+  animation: fadeUp 0.6s ease both;
+}
+
+.skill-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.skill-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.skill-card h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #222;
+}
+
+.skill-card p {
+  font-size: 13px;
+  color: #777;
+}
+
+/* ===== 作品卡片 ===== */
+.works-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.work-card {
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  transition: transform 0.25s, box-shadow 0.25s;
+  animation: fadeUp 0.6s ease both;
+}
+
+.work-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.work-cover {
+  background: linear-gradient(135deg, #e3ecff, #d4c8ff);
+  font-size: 60px;
+  text-align: center;
+  padding: 30px;
+}
+
+.work-info {
+  padding: 20px;
+}
+
+.work-info h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.work-info p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 14px;
+}
+
+.work-link {
+  color: #1a73e8;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.work-link:hover {
+  text-decoration: underline;
+}
+
+/* ===== 联系方式 ===== */
+.contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+}
+
+.contact-icon {
+  font-size: 22px;
+}
+
+.contact-item a {
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+.contact-item a:hover {
+  text-decoration: underline;
+}
+
+/* ===== 页脚 ===== */
+.footer {
+  background-color: #222;
+  color: #aaa;
+  text-align: center;
+  padding: 24px;
+  font-size: 14px;
+}
+
+/* ===== 动画定义 ===== */
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== 响应式：手机屏幕适配 ===== */
+@media (max-width: 600px) {
+  .hero-name { font-size: 26px; }
+  .skills-grid { grid-template-columns: repeat(2, 1fr); }
+  .section { padding: 50px 0; }
+}
+
+/* ===== 暗黑模式 ===== */
+body.dark {
+  background-color: #0f0f1a;
+  color: #e0e0e0;
+}
+
+body.dark .section-alt {
+  background-color: #16162a;
+}
+
+body.dark .skill-card,
+body.dark .work-card {
+  background-color: #1e1e2e;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+body.dark .skill-card h3 {
+  color: #e0e0e0;
+}
+
+body.dark .skill-card p,
+body.dark .work-info p {
+  color: #aaa;
+}
+
+body.dark .section-title {
+  color: #90caf9;
+}
+
+body.dark .section-title::after {
+  background-color: #90caf9;
+}
+
+body.dark .work-link {
+  color: #90caf9;
+}
+
+body.dark .contact-item a {
+  color: #90caf9;
+}
+
+body.dark .theme-toggle-btn {
+  background-color: #1e1e2e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+body.dark .theme-toggle-btn:hover {
+  background-color: #2a2a3e;
+}
